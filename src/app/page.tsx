@@ -588,11 +588,25 @@ export default function HomePage() {
     url: "", title: "", source: "", category: "", tags: "", description: ""
   });
 
-  // Disable scrolling on mount
+  // Disable scrolling only on large screens (desktop/PC)
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    const disableScrollOnLargeScreen = () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'unset';
+      }
+    };
+
+    // Set initial state
+    disableScrollOnLargeScreen();
+
+    // Listen for resize events
+    window.addEventListener('resize', disableScrollOnLargeScreen);
+
     return () => {
       document.body.style.overflow = 'unset';
+      window.removeEventListener('resize', disableScrollOnLargeScreen);
     };
   }, []);
   
@@ -863,7 +877,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
