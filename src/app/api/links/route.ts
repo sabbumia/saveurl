@@ -1,32 +1,37 @@
 // src/app/api/links/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { db } from "@/db";
 import { links } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 
-// Helper function to get userId from session/auth
-// Replace this with your actual authentication logic
-async function getUserId(request: NextRequest): Promise<number | null> {
-  // TODO: Implement proper authentication
-  // For now, returning a hardcoded user ID
-  // You should replace this with actual session/JWT verification
-  
-  // Example with cookie-based session:
-  // const session = await getSession(request);
-  // return session?.userId || null;
-  
-  // For testing purposes, return user ID 1
-  return 1;
+// Helper function to get userId from session
+async function getUserId(): Promise<number | null> {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
+      return null;
+    }
+
+    // Get user ID from session (it's stored as string, convert to number)
+    const userId = (session.user as any).id;
+    return userId ? parseInt(userId) : null;
+  } catch (error) {
+    console.error("Error getting user ID:", error);
+    return null;
+  }
 }
 
 // GET - Fetch all links for the authenticated user
 export async function GET(request: NextRequest) {
   try {
-    const userId = await getUserId(request);
+    const userId = await getUserId();
 
     if (!userId) {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { error: "Unauthorized. Please sign in." },
         { status: 401 }
       );
     }
@@ -53,11 +58,11 @@ export async function GET(request: NextRequest) {
 // POST - Create a new link
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getUserId(request);
+    const userId = await getUserId();
 
     if (!userId) {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { error: "Unauthorized. Please sign in." },
         { status: 401 }
       );
     }
@@ -83,7 +88,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create the link
+    // Create the link for the authenticated user
     const newLink = await db
       .insert(links)
       .values({
@@ -110,14 +115,14 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE - Delete a link
+// DELETE - Delete a link (only if it belongs to the user)
 export async function DELETE(request: NextRequest) {
   try {
-    const userId = await getUserId(request);
+    const userId = await getUserId();
 
     if (!userId) {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { error: "Unauthorized. Please sign in." },
         { status: 401 }
       );
     }
@@ -132,7 +137,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Delete only if the link belongs to the user
+    // Delete only if the link belongs to the authenticated user
     const deletedLink = await db
       .delete(links)
       .where(and(eq(links.id, parseInt(linkId)), eq(links.userId, userId)))
@@ -140,7 +145,7 @@ export async function DELETE(request: NextRequest) {
 
     if (deletedLink.length === 0) {
       return NextResponse.json(
-        { error: "Link not found or unauthorized" },
+        { error: "Link not found or you don't have permission to delete it" },
         { status: 404 }
       );
     }
@@ -158,14 +163,14 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-// PUT - Update a link
+// PUT - Update a link (only if it belongs to the user)
 export async function PUT(request: NextRequest) {
   try {
-    const userId = await getUserId(request);
+    const userId = await getUserId();
 
     if (!userId) {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { error: "Unauthorized. Please sign in." },
         { status: 401 }
       );
     }
@@ -180,7 +185,19 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Update only if the link belongs to the user
+    // Validate URL format if URL is being updated
+    if (url) {
+      try {
+        new URL(url);
+      } catch {
+        return NextResponse.json(
+          { error: "Invalid URL format" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Update only if the link belongs to the authenticated user
     const updatedLink = await db
       .update(links)
       .set({
@@ -197,7 +214,7 @@ export async function PUT(request: NextRequest) {
 
     if (updatedLink.length === 0) {
       return NextResponse.json(
-        { error: "Link not found or unauthorized" },
+        { error: "Link not found or you don't have permission to update it" },
         { status: 404 }
       );
     }
