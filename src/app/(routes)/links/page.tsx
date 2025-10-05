@@ -1,5 +1,4 @@
-
-// 2. LINKS PAGE (src/app/links/page.tsx)
+// src/app/(routes)/links/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -37,36 +36,7 @@ export default function LinksPage() {
     search: "",
   });
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/signin");
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    fetchLinks();
-    fetchCategories();
-    fetchSources();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [filters, links]);
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="animate-pulse">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return null;
-  }
-
+  // Define functions BEFORE useEffect
   const fetchCategories = async () => {
     try {
       const response = await fetch("/api/categories");
@@ -186,6 +156,37 @@ export default function LinksPage() {
     };
     return colors[category.toLowerCase()] || "bg-indigo-100 text-indigo-800 border-indigo-200";
   };
+
+  // useEffect hooks AFTER function definitions
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/signin");
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    fetchLinks();
+    fetchCategories();
+    fetchSources();
+  }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [filters, links]);
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="animate-pulse">
+          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return null;
+  }
 
   const activeFiltersCount = [filters.category, filters.source, filters.search].filter(Boolean).length;
 
