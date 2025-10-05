@@ -8,10 +8,10 @@ import bcrypt from "bcryptjs";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, name, age } = body;
+    const { email, password, name } = body;
 
     // Validation
-    if (!email || !password || !name || !age) {
+    if (!email || !password || !name) {
       return NextResponse.json(
         { error: "All fields are required" },
         { status: 400 }
