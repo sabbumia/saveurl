@@ -569,6 +569,7 @@
 
 
 // src/app/page.tsx  (10% compress)
+// src/app/page.tsx
 
 "use client";
 
@@ -586,6 +587,14 @@ export default function HomePage() {
   const [formData, setFormData] = useState({
     url: "", title: "", source: "", category: "", tags: "", description: ""
   });
+
+  // Disable scrolling on mount
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
   
   const [categories, setCategories] = useState<string[]>(defaultCategories);
   const [sources, setSources] = useState<string[]>(defaultSources);
@@ -854,7 +863,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
@@ -1023,7 +1032,7 @@ export default function HomePage() {
 
             {/* Tags Field */}
             <div className="group transform transition-all duration-300 hover:scale-[1.01]">
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-200 mb-2">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-200 mb-1.5">
                 <Tag className="w-4 h-4" />
                 Tags <span className="text-gray-400 text-xs font-normal">(comma-separated)</span>
               </label>
@@ -1031,32 +1040,32 @@ export default function HomePage() {
                 type="text"
                 value={formData.tags}
                 onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300 hover:bg-white/15 text-sm sm:text-base"
+                className="w-full px-4 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300 hover:bg-white/15 text-sm sm:text-base"
                 placeholder="tutorial, javascript, react"
               />
             </div>
 
             {/* Description Field */}
             <div className="group transform transition-all duration-300 hover:scale-[1.01]">
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-200 mb-2">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-200 mb-1.5">
                 <FileText className="w-4 h-4" />
                 Description
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={3}
-                className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300 hover:bg-white/15 resize-none text-sm sm:text-base"
+                rows={2}
+                className="w-full px-4 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300 hover:bg-white/15 resize-none text-sm sm:text-base"
                 placeholder="Optional description"
               />
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 sm:py-4 px-6 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 disabled:from-gray-500 disabled:to-gray-600 transition-all duration-300 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 disabled:scale-100 flex items-center justify-center gap-2 text-sm sm:text-base disabled:cursor-not-allowed"
+                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2.5 sm:py-3 px-6 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 disabled:from-gray-500 disabled:to-gray-600 transition-all duration-300 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 disabled:scale-100 flex items-center justify-center gap-2 text-sm sm:text-base disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <>
@@ -1073,7 +1082,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => router.push("/links")}
-                className="flex-1 bg-white/10 backdrop-blur-sm border border-white/20 text-white py-3 sm:py-4 px-6 rounded-xl font-semibold hover:bg-white/20 transition-all duration-300 hover:scale-105 text-sm sm:text-base flex items-center justify-center gap-2"
+                className="flex-1 bg-white/10 backdrop-blur-sm border border-white/20 text-white py-2.5 sm:py-3 px-6 rounded-xl font-semibold hover:bg-white/20 transition-all duration-300 hover:scale-105 text-sm sm:text-base flex items-center justify-center gap-2"
               >
                 <ExternalLink className="w-5 h-5" />
                 View All Links
