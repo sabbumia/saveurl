@@ -1,12 +1,10 @@
-// src/app/(routes)/links/page.tsx
+// src/app/(routes)/public/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { Search, Filter, X, Trash2, ExternalLink, Plus, Grid3x3, List, Calendar } from 'lucide-react';
+import { Search, Filter, X, ExternalLink, Calendar, User, Grid3x3, List, Globe } from 'lucide-react';
 
-interface Link {
+interface PublicLink {
   id: number;
   url: string;
   title: string;
@@ -14,13 +12,14 @@ interface Link {
   category: string;
   tags: string;
   description: string;
+  userName: string;
+  userEmail: string;
   createdAt: string;
 }
 
-export default function LinksPage() {
-  const router = useRouter();
-  const [links, setLinks] = useState<Link[]>([]);
-  const [filteredLinks, setFilteredLinks] = useState<Link[]>([]);
+export default function PublicLinksPage() {
+  const [links, setLinks] = useState<PublicLink[]>([]);
+  const [filteredLinks, setFilteredLinks] = useState<PublicLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -28,55 +27,34 @@ export default function LinksPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [sources, setSources] = useState<string[]>([]);
 
-  const { data: session, status } = useSession();
-
   const [filters, setFilters] = useState({
     category: "",
     source: "",
     search: "",
   });
 
-  // Define functions BEFORE useEffect
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch("/api/categories");
-      if (response.ok) {
-        const data = await response.json();
-        setCategories(data.categories);
-      }
-    } catch (err) {
-      console.error("Failed to fetch categories:", err);
-    }
-  };
-
-  const fetchSources = async () => {
-    try {
-      const response = await fetch("/api/sources");
-      if (response.ok) {
-        const data = await response.json();
-        setSources(data.sources);
-      }
-    } catch (err) {
-      console.error("Failed to fetch sources:", err);
-    }
-  };
-
-  const fetchLinks = async () => {
+  const fetchPublicLinks = async () => {
     setIsLoading(true);
     setError("");
 
     try {
-      const response = await fetch("/api/links");
+      const response = await fetch("/api/public-links");
       const data = await response.json();
 
       if (response.ok) {
         setLinks(data.links);
         setFilteredLinks(data.links);
+        
+        // Extract unique categories and sources
+        const uniqueCategories = [...new Set(data.links.map((link: PublicLink) => link.category))];
+        const uniqueSources = [...new Set(data.links.map((link: PublicLink) => link.source))];
+        setCategories(uniqueCategories as string[]);
+        setSources(uniqueSources as string[]);
       } else {
-        setError(data.error || "Failed to fetch links");
+        setError(data.error || "Failed to fetch public links");
       }
     } catch (err) {
-      setError("An error occurred while fetching links");
+      setError("An error occurred while fetching public links");
     } finally {
       setIsLoading(false);
     }
@@ -99,29 +77,12 @@ export default function LinksPage() {
         (link) =>
           link.title?.toLowerCase().includes(searchLower) ||
           link.description?.toLowerCase().includes(searchLower) ||
-          link.tags?.toLowerCase().includes(searchLower)
+          link.tags?.toLowerCase().includes(searchLower) ||
+          link.userName?.toLowerCase().includes(searchLower)
       );
     }
 
     setFilteredLinks(filtered);
-  };
-
-  const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this link?")) return;
-
-    try {
-      const response = await fetch(`/api/links?id=${id}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        setLinks(links.filter((link) => link.id !== id));
-      } else {
-        alert("Failed to delete link");
-      }
-    } catch (err) {
-      alert("An error occurred while deleting the link");
-    }
   };
 
   const clearFilters = () => {
@@ -157,36 +118,13 @@ export default function LinksPage() {
     return colors[category.toLowerCase()] || "bg-indigo-100 text-indigo-800 border-indigo-200";
   };
 
-  // useEffect hooks AFTER function definitions
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/signin");
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    fetchLinks();
-    fetchCategories();
-    fetchSources();
+    fetchPublicLinks();
   }, []);
 
   useEffect(() => {
     applyFilters();
   }, [filters, links]);
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="animate-pulse">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return null;
-  }
 
   const activeFiltersCount = [filters.category, filters.source, filters.search].filter(Boolean).length;
 
@@ -195,7 +133,7 @@ export default function LinksPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <div className="text-2xl text-white">Loading links...</div>
+          <div className="text-2xl text-white">Loading public links...</div>
         </div>
       </div>
     );
@@ -214,11 +152,12 @@ export default function LinksPage() {
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-                My Links
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 flex items-center gap-3">
+                <Globe className="w-10 h-10 text-blue-400" />
+                Public Links
               </h1>
               <p className="text-gray-300 text-sm sm:text-base">
-                {filteredLinks.length} of {links.length} links
+                {filteredLinks.length} of {links.length} public links
                 {activeFiltersCount > 0 && (
                   <span className="ml-2 px-2 py-1 bg-purple-500/30 rounded-full text-xs">
                     {activeFiltersCount} filter{activeFiltersCount > 1 ? 's' : ''} active
@@ -226,29 +165,20 @@ export default function LinksPage() {
                 )}
               </p>
             </div>
-            <div className="flex gap-3 w-full sm:w-auto">
-              <div className="flex gap-2 bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded ${viewMode === 'grid' ? 'bg-purple-500 text-white' : 'text-gray-300 hover:text-white'} transition-all`}
-                  title="Grid view"
-                >
-                  <Grid3x3 className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded ${viewMode === 'list' ? 'bg-purple-500 text-white' : 'text-gray-300 hover:text-white'} transition-all`}
-                  title="List view"
-                >
-                  <List className="w-5 h-5" />
-                </button>
-              </div>
+            <div className="flex gap-2 bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
               <button
-                onClick={() => router.push("/")}
-                className="flex-1 sm:flex-none bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 px-4 sm:px-6 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:scale-105 flex items-center justify-center gap-2"
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded ${viewMode === 'grid' ? 'bg-purple-500 text-white' : 'text-gray-300 hover:text-white'} transition-all`}
+                title="Grid view"
               >
-                <Plus className="w-5 h-5" />
-                Add Link
+                <Grid3x3 className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded ${viewMode === 'list' ? 'bg-purple-500 text-white' : 'text-gray-300 hover:text-white'} transition-all`}
+                title="List view"
+              >
+                <List className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -340,16 +270,16 @@ export default function LinksPage() {
           {filteredLinks.length === 0 ? (
             <div className="text-center py-16 animate-fadeIn">
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-purple-500/20 mb-4">
-                <ExternalLink className="w-10 h-10 text-purple-300" />
+                <Globe className="w-10 h-10 text-purple-300" />
               </div>
               <p className="text-gray-300 text-lg mb-2">
                 {links.length === 0
-                  ? "No links saved yet"
+                  ? "No public links yet"
                   : "No links match your filters"}
               </p>
               <p className="text-gray-400 text-sm">
                 {links.length === 0
-                  ? "Add your first link to get started!"
+                  ? "Be the first to share a public link!"
                   : "Try adjusting your filters"}
               </p>
             </div>
@@ -378,13 +308,6 @@ export default function LinksPage() {
                           {link.category}
                         </span>
                       </div>
-                      <button
-                        onClick={() => handleDelete(link.id)}
-                        className="text-red-400 hover:text-red-300 font-semibold transition-colors p-2 hover:bg-red-500/10 rounded-lg"
-                        title="Delete link"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
                     </div>
 
                     <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">
@@ -409,9 +332,9 @@ export default function LinksPage() {
 
                     {link.tags && (
                       <div className="flex flex-wrap gap-2 mt-3">
-                        {link.tags.split(",").slice(0, 3).map((tag, index) => (
+                        {link.tags.split(",").slice(0, 3).map((tag, idx) => (
                           <span
-                            key={index}
+                            key={idx}
                             className="bg-purple-500/20 text-purple-200 px-2 py-1 rounded-lg text-xs border border-purple-500/30"
                           >
                             #{tag.trim()}
@@ -425,9 +348,15 @@ export default function LinksPage() {
                       </div>
                     )}
 
-                    <div className="mt-3 text-xs text-gray-400 flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      Added {new Date(link.createdAt).toLocaleDateString()}
+                    <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <User className="w-3 h-3" />
+                        <span>{link.userName}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        <span>{new Date(link.createdAt).toLocaleDateString()}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
