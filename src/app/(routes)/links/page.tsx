@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Search, Filter, X, Trash2, ExternalLink, Plus, Grid3x3, List, Calendar } from 'lucide-react';
+import WaveLoader from "../../_components/Loader";
 
 interface Link {
   id: number;
@@ -192,11 +193,8 @@ export default function LinksPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <div className="text-2xl text-white">Loading links...</div>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <WaveLoader color="#f038a3" text="Loading links..." fullPage={true} />
       </div>
     );
   }

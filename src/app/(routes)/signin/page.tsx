@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, FormEvent, useEffect } from "react";
 import Link from "next/link";
 import { Mail, Lock, LogIn, Sparkles, Eye, EyeOff } from 'lucide-react';
+import WaveLoader from "../../_components/Loader";
 
 export default function SignIn() {
   const router = useRouter();
@@ -58,10 +59,8 @@ export default function SignIn() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="animate-pulse">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <WaveLoader color="#f038a3" text="Please wait..." fullPage={true} />
       </div>
     );
   }

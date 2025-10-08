@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { Link2, Sparkles, Tag, FileText, Zap, Check, AlertCircle, ExternalLink, Lock, Globe, Users } from 'lucide-react';
+import WaveLoader from "./_components/Loader";
 
 const defaultCategories = ["education", "music", "movies", "documents", "tech", "news", "social", "other"];
 const defaultSources = ["youtube", "facebook", "linkedin", "twitter", "instagram", "github", "medium", "reddit", "other"];
@@ -326,10 +327,8 @@ export default function HomePage() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="animate-pulse">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <WaveLoader color="#f038a3" text="Please Wait..." fullPage={true} />
       </div>
     );
   }

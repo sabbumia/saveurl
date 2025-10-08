@@ -9,6 +9,7 @@ import {
   Link as LinkIcon, ExternalLink, Settings, Search, Filter,
   ChevronDown, Copy, Check, UserMinus, Edit2, Share2
 } from 'lucide-react';
+import WaveLoader from "../../_components/Loader";
 
 interface Group {
   id: number;
@@ -324,11 +325,8 @@ export default function GroupsPage() {
 
   if (status === "loading" || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-300">Loading groups...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <WaveLoader color="#f038a3" text="Loading groups..." fullPage={true} />
       </div>
     );
   }
