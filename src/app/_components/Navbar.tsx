@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
-import { Menu, X, LogOut, Home, Link2 as LinkIcon, Users, Globe, Plus } from 'lucide-react';
+import { Menu, X, LogOut, Home, Link2 as LinkIcon, Users, Globe, Plus, BookOpen } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
@@ -70,6 +70,16 @@ export default function Navbar() {
             >
               <Globe className="w-4 h-4" />
               Public
+            </Link>
+
+            <Link
+              href="/guide"
+              className={`px-4 py-2 text-sm font-medium hover:bg-white/10 hover:scale-105 transform transition-all duration-300 rounded-lg flex items-center gap-2 ${
+                isActive('/guide') ? 'bg-white/10 text-green-300' : ''
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              How to Use
             </Link>
 
             {status === 'authenticated' ? (
@@ -156,6 +166,17 @@ export default function Navbar() {
               >
                 <Globe className="w-4 h-4" />
                 Public Links
+              </Link>
+
+              <Link
+                href="/guide"
+                className={`block px-3 py-2 text-base font-medium hover:bg-white/10 rounded-lg transition-colors duration-300 flex items-center gap-2 ${
+                  isActive('/guide') ? 'bg-white/10 text-green-300' : ''
+                }`}
+                onClick={toggleMenu}
+              >
+                <BookOpen className="w-4 h-4" />
+                How to Use
               </Link>
 
               {status === 'authenticated' ? (
